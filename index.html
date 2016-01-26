@@ -1,0 +1,87 @@
+<html>
+	<head>
+		<title>N Bodies</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			var N = 1000;
+			var MAX_DIM = 1000;
+			var MAX_V = 50;
+			var SPHERE_RADIUS = 5;
+			var SPHERE_WIDTH_SEGS = 3;
+			var SPHERE_HEIGHT_SEGS = 2;
+			var GRAV_CONSTANT_ACCEL = MAX_V;
+
+			// Returns a random number between min (inclusive) and max (exclusive)
+			function getRandomArbitrary(min, max) {
+			  return Math.random() * (max - min) + min;
+			}
+
+			var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+			var generateParticle = function() {
+				var particle = new THREE.SphereGeometry(SPHERE_RADIUS);
+				var sphere = new THREE.Mesh(particle, material);
+				sphere.position.x = getRandomArbitrary(-MAX_DIM, MAX_DIM);
+				sphere.position.y = getRandomArbitrary(-MAX_DIM, MAX_DIM);
+				// sphere.position.z = getRandomArbitrary(-MAX_DIM, MAX_DIM);
+				sphere.userData.vx = getRandomArbitrary(-MAX_V, MAX_V);
+				sphere.userData.vy = getRandomArbitrary(-MAX_V, MAX_V);
+				// sphere.userData.vz = getRandomArbitrary(-MAX_V, MAX_V);
+				return sphere;
+			}
+
+			function updateParticles(particles) {
+				var dt = 1./ 60;
+				for (var i = 0; i < N; i++) {
+					var sphere = particles[i];
+					sphere.position.x += sphere.userData.vx * dt;
+					sphere.position.y += sphere.userData.vy * dt;
+					// sphere.position.z += sphere.userData.vz * dt;
+					for (var j = 0; j < N; j++) {
+						if (j != i) {
+							var sphere2 = particles[j];
+							var dx = sphere2.position.x - sphere.position.x;
+							var dy = sphere2.position.y - sphere.position.y;
+							// var dz = sphere2.position.z - sphere.position.z;
+							var ds = Math.sqrt(dx * dx + dy * dy);
+							sphere.userData.vx += (dx / ds) * GRAV_CONSTANT_ACCEL / (ds * ds) * dt; 
+							sphere.userData.vy += (dy / ds) * GRAV_CONSTANT_ACCEL / (ds * ds) * dt; 
+							// sphere.userData.vz += (dz / ds) * GRAV_CONSTANT_ACCEL / (ds * ds) * dt; 
+							// console.log((dx / ds) * GRAV_CONSTANT_ACCEL / (ds * ds) * dt);
+						}
+					}
+				}
+			}
+
+			particles = [];
+			for (var i = 0; i < N; i++) {
+				var sphere = generateParticle();
+				scene.add(sphere);
+				particles.push(sphere);
+			}
+
+			camera.position.z = 600;
+			var render = function () {
+				requestAnimationFrame( render );
+
+				updateParticles(particles);
+
+				renderer.render(scene, camera);
+			};
+
+			render();
+		</script>
+	</body>
+</html>
