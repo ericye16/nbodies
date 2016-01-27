@@ -1,4 +1,5 @@
 # N-Bodies
+![N-body animation gif](http://i.imgur.com/GILcvdI.gifv)
 The N-body problem is the problem of finding the motion of a group of particles that are all acting on each other, for example through gravitation.
 A nice summary can be found here: [https://en.wikipedia.org/wiki/N-body_problem](https://en.wikipedia.org/wiki/N-body_problem).
 
