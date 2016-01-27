@@ -9,9 +9,21 @@
 	<body>
 		<script src="js/three.min.js"></script>
 		<script src="js/OrbitControls.js"></script>
+		<script src="js/Stats.js"></script>
 		<script>
+			var stats = new Stats();
+			stats.setMode( 0 ); // 0: fps, 1: ms, 2: mb
+
+			// align top-left
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.left = '0px';
+			stats.domElement.style.top = '0px';
+
+			document.body.appendChild( stats.domElement );
+
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera( 30, window.innerWidth/window.innerHeight, 0.1, 1000 );
+			var clock = new THREE.Clock;
 
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
@@ -55,7 +67,9 @@
 			}
 
 			function updateParticles(particles) {
-				var dt = 1./ 60;
+				// var dt = clock.getDelta();
+				var dt = 1/60.0;
+				console.log(dt);
 				for (var i = 0; i < N; i++) {
 					if (particles[i]) {
 						var sphere = particles[i];
@@ -108,9 +122,11 @@
 			var render = function () {
 				requestAnimationFrame( render );
 
+				stats.begin();
 				updateParticles(particles);
 
 				renderer.render(scene, camera);
+				stats.end();
 			};
 
 			render();
