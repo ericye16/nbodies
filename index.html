@@ -33,7 +33,7 @@
 
 			var N = 500;
 			var MAX_DIM = 100;
-			var MAX_V = 10;
+			var MAX_V = 1;
 			var SPHERE_RADIUS = 1;
 			var SPHERE_WIDTH_SEGS = 3;
 			var SPHERE_HEIGHT_SEGS = 2;
@@ -51,10 +51,9 @@
 				sphere.position.x = getRandomArbitrary(-MAX_DIM, MAX_DIM);
 				sphere.position.y = getRandomArbitrary(-MAX_DIM, MAX_DIM);
 				sphere.position.z = getRandomArbitrary(-MAX_DIM, MAX_DIM);
-				sphere.userData.v = new THREE.Vector3();
-				sphere.userData.v.x = getRandomArbitrary(-MAX_V, MAX_V);
-				sphere.userData.v.y = getRandomArbitrary(-MAX_V, MAX_V);
-				sphere.userData.v.z = getRandomArbitrary(-MAX_V, MAX_V);
+				sphere.userData.vx = getRandomArbitrary(-MAX_V, MAX_V);
+				sphere.userData.vy = getRandomArbitrary(-MAX_V, MAX_V);
+				sphere.userData.vz = getRandomArbitrary(-MAX_V, MAX_V);
 				sphere.userData.m = getRandomArbitrary(0.8, 8.0);
 				return sphere;
 			}
@@ -70,35 +69,41 @@
 			function updateParticles(particles) {
 				// var dt = clock.getDelta();
 				var dt = 1/60.0;
-				// console.log(dt);
+				console.log(dt);
 				for (var i = 0; i < N; i++) {
 					if (particles[i]) {
 						var sphere = particles[i];
-						sphere.position.addScaledVector(sphere.userData.v, dt);
+						sphere.position.x += sphere.userData.vx * dt;
+						sphere.position.y += sphere.userData.vy * dt;
+						sphere.position.z += sphere.userData.vz * dt;
 						for (var j = 0; j < N; j++) {
 							if (j != i && particles[j]) {
 								var sphere2 = particles[j];
-								var ds = new THREE.Vector3();
-								ds.subVectors(sphere2.position, sphere.position);
-								if (ds.length() < (sphere.geometry.boundingSphere.radius + sphere2.geometry.boundingSphere.radius)) { // collision detected
+								var dx = sphere2.position.x - sphere.position.x;
+								var dy = sphere2.position.y - sphere.position.y;
+								var dz = sphere2.position.z - sphere.position.z;
+								var ds = Math.sqrt(dx * dx + dy * dy + dz * dz);
+								if (ds < (sphere.geometry.boundingSphere.radius + sphere2.geometry.boundingSphere.radius)) { // collision detected
 									// inelastic collision
 									var mass = sphere.userData.m + sphere2.userData.m;
-									var newV = new THREE.Vector3();
-									newV.addScaledVector(sphere.userData.v, sphere.userData.m / mass);
-									newV.addScaledVector(sphere2.userData.v, sphere2.userData.m / mass);
-									sphere.userData.v = newV;
+									var vx = (sphere.userData.vx * sphere.userData.m + sphere2.userData.vx * sphere2.userData.m) / mass;
+									var vy = (sphere.userData.vy * sphere.userData.m + sphere2.userData.vy * sphere2.userData.m) / mass;
+									var vz = (sphere.userData.vz * sphere.userData.m + sphere2.userData.vz * sphere2.userData.m) / mass;
+									sphere.userData.vx = vx;
+									sphere.userData.vy = vy;
+									sphere.userData.vz = vz;
 									sphere.userData.m = mass;
-									sphere.scale.max(sphere2.scale);
-									sphere.scale.addScalar(0.1);
+									var scale = max(sphere.scale.x, sphere2.scale.x) + 0.1;
+									sphere.scale.x = scale;
+									sphere.scale.y = scale;
+									sphere.scale.z = scale;
 									removeFromScene(sphere2);
 									particles[j] = null;
 								} else {
-									var newV = new THREE.Vector3();
-									var dsNorm = new THREE.Vector3();
-									dsNorm.copy(ds);
-									dsNorm.normalize();
-									newV.addScaledVector(dsNorm, GRAV_CONSTANT_ACCEL * sphere2.userData.m / (ds.lengthSq()));
-									sphere.userData.v = newV;
+									var accel = GRAV_CONSTANT_ACCEL * sphere2.userData.m / (ds * ds); // f = GMm/r^2, a = Gm/r^2
+									sphere.userData.vx += (dx / ds) * accel * dt; 
+									sphere.userData.vy += (dy / ds) * accel * dt; 
+									sphere.userData.vz += (dz / ds) * accel * dt; 
 									// console.log((dx / ds) * GRAV_CONSTANT_ACCEL / (ds * ds) * dt);
 								}
 							}
