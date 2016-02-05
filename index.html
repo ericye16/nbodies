@@ -76,8 +76,8 @@
 						sphere.position.x += sphere.userData.vx * dt;
 						sphere.position.y += sphere.userData.vy * dt;
 						sphere.position.z += sphere.userData.vz * dt;
-						for (var j = 0; j < N; j++) {
-							if (j != i && particles[j]) {
+						for (var j = i + 1; j < N; j++) {
+							if (particles[j]) {
 								var sphere2 = particles[j];
 								var dx = sphere2.position.x - sphere.position.x;
 								var dy = sphere2.position.y - sphere.position.y;
@@ -104,6 +104,10 @@
 									sphere.userData.vx += (dx / ds) * accel * dt; 
 									sphere.userData.vy += (dy / ds) * accel * dt; 
 									sphere.userData.vz += (dz / ds) * accel * dt; 
+									var accel = GRAV_CONSTANT_ACCEL * sphere.userData.m / (ds * ds);
+									sphere2.userData.vx -= (dx / ds) * accel * dt; 
+									sphere2.userData.vy -= (dy / ds) * accel * dt; 
+									sphere2.userData.vz -= (dz / ds) * accel * dt; 
 									// console.log((dx / ds) * GRAV_CONSTANT_ACCEL / (ds * ds) * dt);
 								}
 							}
