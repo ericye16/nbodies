@@ -25,7 +25,7 @@
 			var camera = new THREE.PerspectiveCamera( 30, window.innerWidth/window.innerHeight, 0.1, 1000 );
 			var clock = new THREE.Clock;
 
-			var renderer = new THREE.WebGLRenderer();
+			var renderer = new THREE.WebGLRenderer({antialias: true});
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
 			camera.position.z = 400;
@@ -33,7 +33,7 @@
 
 			var N = 500;
 			var MAX_DIM = 100;
-			var MAX_V = 1;
+			var MAX_V = 10;
 			var SPHERE_RADIUS = 1;
 			var SPHERE_WIDTH_SEGS = 3;
 			var SPHERE_HEIGHT_SEGS = 2;
@@ -69,7 +69,7 @@
 			function updateParticles(particles) {
 				// var dt = clock.getDelta();
 				var dt = 1/60.0;
-				console.log(dt);
+				// console.log(dt);
 				for (var i = 0; i < N; i++) {
 					if (particles[i]) {
 						var sphere = particles[i];
